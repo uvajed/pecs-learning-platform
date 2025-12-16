@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Play,
@@ -8,6 +9,7 @@ import {
   BarChart3,
   BookOpen,
   ArrowRight,
+  UserPlus,
 } from "lucide-react";
 import { DashboardShell, PageHeader } from "@/components/layout/DashboardShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -17,21 +19,41 @@ import { PECS_PHASES } from "@/types";
 
 // Mock user data
 const mockUser = {
-  name: "Sarah Johnson",
-  email: "sarah@example.com",
+  name: "Welcome",
+  email: "",
 };
 
-// Mock children data
-const mockChildren = [
-  { id: "1", name: "Alex", currentPhase: 2, progress: 65 },
-  { id: "2", name: "Emma", currentPhase: 3, progress: 40 },
-];
+interface Child {
+  id: string;
+  name: string;
+  current_phase: number;
+  progress: number;
+}
 
 export default function HomePage() {
+  const [children, setChildren] = useState<Child[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchChildren() {
+      try {
+        const res = await fetch("/api/children");
+        if (res.ok) {
+          const data = await res.json();
+          setChildren(data);
+        }
+      } catch {
+        // Ignore errors
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchChildren();
+  }, []);
   return (
     <DashboardShell user={mockUser}>
       <PageHeader
-        title="Welcome back, Sarah"
+        title="PECS Learning Platform"
         description="Ready to continue learning? Choose an activity below."
       />
 
@@ -101,26 +123,47 @@ export default function HomePage() {
             <CardTitle>Children's Progress</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {mockChildren.map((child) => (
-              <div key={child.id} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="font-medium">{child.name}</span>
-                    <span className="text-sm text-[var(--muted-foreground)] ml-2">
-                      Phase {child.currentPhase}
-                    </span>
-                  </div>
-                  <span className="text-sm font-medium">{child.progress}%</span>
-                </div>
-                <Progress value={child.progress} />
+            {isLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="animate-spin w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full" />
               </div>
-            ))}
-            <Link href="/children">
-              <Button variant="outline" className="w-full mt-4">
-                View All Children
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
+            ) : children.length > 0 ? (
+              <>
+                {children.map((child) => (
+                  <div key={child.id} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="font-medium">{child.name}</span>
+                        <span className="text-sm text-[var(--muted-foreground)] ml-2">
+                          Phase {child.current_phase}
+                        </span>
+                      </div>
+                      <span className="text-sm font-medium">{child.progress}%</span>
+                    </div>
+                    <Progress value={child.progress} />
+                  </div>
+                ))}
+                <Link href="/children">
+                  <Button variant="outline" className="w-full mt-4">
+                    View All Children
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <div className="w-12 h-12 rounded-full bg-[var(--muted)] flex items-center justify-center mx-auto mb-3">
+                  <UserPlus className="w-6 h-6 text-[var(--muted-foreground)]" />
+                </div>
+                <p className="text-[var(--muted-foreground)] mb-3">No children profiles yet</p>
+                <Link href="/children">
+                  <Button>
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Add First Child
+                  </Button>
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
 

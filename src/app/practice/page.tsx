@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Play, Lock, CheckCircle } from "lucide-react";
+import { ArrowLeft, Play, Lock, CheckCircle, UserPlus } from "lucide-react";
 import { DashboardShell, PageHeader } from "@/components/layout/DashboardShell";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -15,7 +15,6 @@ const mockUser = {
   email: "sarah@example.com",
 };
 
-// Mock progress - in real app, this would come from the database
 // All phases unlocked so users can practice any phase
 const mockProgress: Record<number, "locked" | "in_progress" | "completed"> = {
   1: "in_progress",
@@ -26,14 +25,79 @@ const mockProgress: Record<number, "locked" | "in_progress" | "completed"> = {
   6: "in_progress",
 };
 
+interface Child {
+  id: string;
+  name: string;
+  current_phase: number;
+}
+
 export default function PracticePage() {
-  const [selectedChild, setSelectedChild] = React.useState("Alex");
+  const [children, setChildren] = React.useState<Child[]>([]);
+  const [selectedChild, setSelectedChild] = React.useState<string | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchChildren() {
+      try {
+        const res = await fetch("/api/children");
+        if (res.ok) {
+          const data = await res.json();
+          setChildren(data);
+          if (data.length > 0) {
+            setSelectedChild(data[0].name);
+          }
+        }
+      } catch {
+        // Ignore errors, just show empty state
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchChildren();
+  }, []);
+
+  // Show prompt to create a child if none exist
+  if (!isLoading && children.length === 0) {
+    return (
+      <DashboardShell user={mockUser}>
+        <PageHeader
+          title="Practice Session"
+          description="Start a PECS practice session"
+          action={
+            <Link href="/">
+              <Button variant="outline">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+            </Link>
+          }
+        />
+        <Card className="max-w-md mx-auto mt-12">
+          <CardContent className="p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-[var(--muted)] flex items-center justify-center mx-auto mb-4">
+              <UserPlus className="w-8 h-8 text-[var(--muted-foreground)]" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">Create a Profile First</h3>
+            <p className="text-[var(--muted-foreground)] mb-6">
+              Add a child profile to start practicing PECS phases.
+            </p>
+            <Link href="/children">
+              <Button size="lg">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Add Child Profile
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </DashboardShell>
+    );
+  }
 
   return (
     <DashboardShell user={mockUser}>
       <PageHeader
         title="Practice Session"
-        description={`Choose a phase to practice with ${selectedChild}`}
+        description={selectedChild ? `Choose a phase to practice with ${selectedChild}` : "Choose a phase to practice"}
         action={
           <Link href="/">
             <Button variant="outline">
@@ -45,27 +109,34 @@ export default function PracticePage() {
       />
 
       {/* Child selector */}
-      <div className="mb-8">
-        <label className="block text-sm font-medium mb-2">
-          Practicing with:
-        </label>
-        <div className="flex gap-3">
-          {["Alex", "Emma"].map((name) => (
-            <button
-              key={name}
-              onClick={() => setSelectedChild(name)}
-              className={cn(
-                "px-4 py-2 rounded-[var(--radius)] font-medium transition-colors",
-                selectedChild === name
-                  ? "bg-[var(--primary)] text-white"
-                  : "bg-[var(--muted)] hover:bg-[var(--muted)]/80"
-              )}
-            >
-              {name}
-            </button>
-          ))}
+      {children.length > 0 && (
+        <div className="mb-8">
+          <label className="block text-sm font-medium mb-2">
+            Practicing with:
+          </label>
+          <div className="flex flex-wrap gap-3">
+            {children.map((child) => (
+              <button
+                key={child.id}
+                onClick={() => setSelectedChild(child.name)}
+                className={cn(
+                  "px-4 py-2 rounded-[var(--radius)] font-medium transition-colors",
+                  selectedChild === child.name
+                    ? "bg-[var(--primary)] text-white"
+                    : "bg-[var(--muted)] hover:bg-[var(--muted)]/80"
+                )}
+              >
+                {child.name}
+              </button>
+            ))}
+            <Link href="/children">
+              <button className="px-4 py-2 rounded-[var(--radius)] font-medium transition-colors bg-[var(--muted)] hover:bg-[var(--muted)]/80 border-2 border-dashed border-[var(--border)]">
+                + Add
+              </button>
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Phase selection grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

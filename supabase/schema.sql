@@ -60,9 +60,4 @@ CREATE INDEX IF NOT EXISTS idx_children_user_id ON children(user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_child_id ON sessions(child_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_created_at ON sessions(created_at);
 
--- Insert some demo data (optional)
-INSERT INTO children (name, current_phase, progress, sessions)
-VALUES
-  ('Alex', 2, 65, 24),
-  ('Emma', 3, 40, 18)
-ON CONFLICT DO NOTHING;
+-- No demo data - users create their own profiles

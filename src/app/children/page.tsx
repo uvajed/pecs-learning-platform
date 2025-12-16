@@ -31,11 +31,8 @@ interface Child {
   sessions: number;
 }
 
-// Demo data for when database isn't configured
-const demoChildren: Child[] = [
-  { id: "demo-1", name: "Alex", current_phase: 2, progress: 65, sessions: 24 },
-  { id: "demo-2", name: "Emma", current_phase: 3, progress: 40, sessions: 18 },
-];
+// Empty array - users create their own profiles
+const demoChildren: Child[] = [];
 
 export default function ChildrenPage() {
   const [children, setChildren] = useState<Child[]>([]);
