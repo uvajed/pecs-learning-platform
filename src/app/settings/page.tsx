@@ -2,44 +2,19 @@
 
 import { DashboardShell, PageHeader } from "@/components/layout/DashboardShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { Label } from "@/components/ui/Label";
-import { Input } from "@/components/ui/Input";
 import { useUIStore } from "@/stores/uiStore";
 import { Volume2, VolumeX, Sparkles } from "lucide-react";
 
-const mockUser = {
-  name: "Sarah Johnson",
-  email: "sarah@example.com",
-};
 
 export default function SettingsPage() {
   const { soundEnabled, ttsEnabled, animationsEnabled, toggleSound, toggleTTS, toggleAnimations } =
     useUIStore();
 
   return (
-    <DashboardShell user={mockUser}>
+    <DashboardShell>
       <PageHeader title="Settings" description="Manage your account and preferences" />
 
       <div className="grid gap-6 max-w-2xl">
-        {/* Profile Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" defaultValue="Sarah Johnson" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" defaultValue="sarah@example.com" />
-            </div>
-            <Button>Save Changes</Button>
-          </CardContent>
-        </Card>
-
         {/* Audio Settings */}
         <Card>
           <CardHeader>

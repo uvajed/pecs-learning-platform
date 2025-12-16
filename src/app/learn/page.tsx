@@ -5,14 +5,10 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { PECS_PHASES } from "@/types";
 import { BookOpen, CheckCircle } from "lucide-react";
 
-const mockUser = {
-  name: "Sarah Johnson",
-  email: "sarah@example.com",
-};
 
 export default function LearnPage() {
   return (
-    <DashboardShell user={mockUser}>
+    <DashboardShell>
       <PageHeader
         title="Learn About PECS"
         description="Understanding the Picture Exchange Communication System"

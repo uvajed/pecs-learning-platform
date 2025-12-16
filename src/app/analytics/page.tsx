@@ -5,10 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Progress } from "@/components/ui/Progress";
 import { TrendingUp, Clock, Target, Award } from "lucide-react";
 
-const mockUser = {
-  name: "Sarah Johnson",
-  email: "sarah@example.com",
-};
 
 const stats = [
   { label: "Total Sessions", value: "42", icon: Clock, change: "+8 this week" },
@@ -24,7 +20,7 @@ const childProgress = [
 
 export default function AnalyticsPage() {
   return (
-    <DashboardShell user={mockUser}>
+    <DashboardShell>
       <PageHeader
         title="Progress & Analytics"
         description="Track learning progress and view detailed statistics"

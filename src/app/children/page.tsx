@@ -18,10 +18,6 @@ import {
   DialogFooter,
 } from "@/components/ui/Dialog";
 
-const mockUser = {
-  name: "Sarah Johnson",
-  email: "sarah@example.com",
-};
 
 interface Child {
   id: string;
@@ -155,7 +151,7 @@ export default function ChildrenPage() {
   };
 
   return (
-    <DashboardShell user={mockUser}>
+    <DashboardShell>
       <PageHeader
         title="Children"
         description="Manage learner profiles and track their progress"

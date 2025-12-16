@@ -19,10 +19,6 @@ import {
 } from "@/lib/cards/cardData";
 import Image from "next/image";
 
-const mockUser = {
-  name: "Sarah Johnson",
-  email: "sarah@example.com",
-};
 
 const categories = ["All", "Food", "Toys", "Actions", "People", "Feelings", "Places", "Starters"];
 
@@ -48,7 +44,7 @@ export default function CardsPage() {
   });
 
   return (
-    <DashboardShell user={mockUser}>
+    <DashboardShell>
       <PageHeader
         title="Picture Cards"
         description="Browse, create, and manage communication cards"

@@ -9,11 +9,6 @@ import { Button } from "@/components/ui/Button";
 import { PECS_PHASES, type PECSPhase } from "@/types";
 import { cn } from "@/lib/utils";
 
-// Mock user data
-const mockUser = {
-  name: "Sarah Johnson",
-  email: "sarah@example.com",
-};
 
 // All phases unlocked so users can practice any phase
 const mockProgress: Record<number, "locked" | "in_progress" | "completed"> = {
@@ -59,7 +54,7 @@ export default function PracticePage() {
   // Show prompt to create a child if none exist
   if (!isLoading && children.length === 0) {
     return (
-      <DashboardShell user={mockUser}>
+      <DashboardShell>
         <PageHeader
           title="Practice Session"
           description="Start a PECS practice session"
@@ -94,7 +89,7 @@ export default function PracticePage() {
   }
 
   return (
-    <DashboardShell user={mockUser}>
+    <DashboardShell>
       <PageHeader
         title="Practice Session"
         description={selectedChild ? `Choose a phase to practice with ${selectedChild}` : "Choose a phase to practice"}

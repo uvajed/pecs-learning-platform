@@ -17,11 +17,6 @@ import { Button } from "@/components/ui/Button";
 import { Progress } from "@/components/ui/Progress";
 import { PECS_PHASES } from "@/types";
 
-// Mock user data
-const mockUser = {
-  name: "Welcome",
-  email: "",
-};
 
 interface Child {
   id: string;
@@ -51,7 +46,7 @@ export default function HomePage() {
     fetchChildren();
   }, []);
   return (
-    <DashboardShell user={mockUser}>
+    <DashboardShell>
       <PageHeader
         title="PECS Learning Platform"
         description="Ready to continue learning? Choose an activity below."
