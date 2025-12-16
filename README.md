@@ -24,6 +24,7 @@ A web-based Picture Exchange Communication System (PECS) learning platform desig
 - Radix UI for accessible components
 - Zustand for state management
 - Framer Motion for animations
+- Supabase for database (optional)
 
 ## Getting Started
 
@@ -39,6 +40,37 @@ npm run build
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+## Database Setup
+
+The app works without a database in demo mode (data stored locally, lost on refresh). For persistent storage:
+
+### 1. Create a Supabase Project
+
+1. Go to [supabase.com](https://supabase.com) and create a free account
+2. Create a new project
+3. Wait for the project to be provisioned
+
+### 2. Run the Schema
+
+1. Go to the SQL Editor in your Supabase dashboard
+2. Copy the contents of `supabase/schema.sql`
+3. Run the SQL to create tables and policies
+
+### 3. Configure Environment Variables
+
+1. Copy `.env.example` to `.env.local`:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. Fill in your Supabase credentials (found in Project Settings > API):
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+   ```
+
+3. For Vercel deployment, add these same variables in your Vercel project settings.
 
 ## Deploy
 

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Settings, Trash2 } from "lucide-react";
+import { Plus, Settings, Trash2, Database, AlertCircle } from "lucide-react";
 import { DashboardShell, PageHeader } from "@/components/layout/DashboardShell";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -26,46 +26,130 @@ const mockUser = {
 interface Child {
   id: string;
   name: string;
-  currentPhase: number;
+  current_phase: number;
   progress: number;
   sessions: number;
 }
 
-const initialChildren: Child[] = [
-  { id: "1", name: "Alex", currentPhase: 2, progress: 65, sessions: 24 },
-  { id: "2", name: "Emma", currentPhase: 3, progress: 40, sessions: 18 },
+// Demo data for when database isn't configured
+const demoChildren: Child[] = [
+  { id: "demo-1", name: "Alex", current_phase: 2, progress: 65, sessions: 24 },
+  { id: "demo-2", name: "Emma", current_phase: 3, progress: 40, sessions: 18 },
 ];
 
 export default function ChildrenPage() {
-  const [children, setChildren] = useState<Child[]>(initialChildren);
+  const [children, setChildren] = useState<Child[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDbConfigured, setIsDbConfigured] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [childToDelete, setChildToDelete] = useState<Child | null>(null);
   const [newChildName, setNewChildName] = useState("");
   const [newChildPhase, setNewChildPhase] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleAddChild = () => {
+  // Fetch children on mount
+  useEffect(() => {
+    fetchChildren();
+  }, []);
+
+  const fetchChildren = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/children");
+
+      if (res.status === 503) {
+        // Database not configured, use demo mode
+        setIsDbConfigured(false);
+        setChildren(demoChildren);
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch children");
+      }
+
+      const data = await res.json();
+      setChildren(data);
+      setIsDbConfigured(true);
+    } catch (err) {
+      setError("Failed to load children. Using demo mode.");
+      setIsDbConfigured(false);
+      setChildren(demoChildren);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddChild = async () => {
     if (!newChildName.trim()) return;
 
-    const newChild: Child = {
-      id: Date.now().toString(),
-      name: newChildName.trim(),
-      currentPhase: newChildPhase,
-      progress: 0,
-      sessions: 0,
-    };
+    setIsSaving(true);
 
-    setChildren([...children, newChild]);
+    if (isDbConfigured) {
+      try {
+        const res = await fetch("/api/children", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: newChildName.trim(),
+            current_phase: newChildPhase,
+          }),
+        });
+
+        if (!res.ok) throw new Error("Failed to create child");
+
+        const newChild = await res.json();
+        setChildren([newChild, ...children]);
+      } catch (err) {
+        setError("Failed to save. Try again.");
+        setIsSaving(false);
+        return;
+      }
+    } else {
+      // Demo mode - add locally
+      const newChild: Child = {
+        id: `local-${Date.now()}`,
+        name: newChildName.trim(),
+        current_phase: newChildPhase,
+        progress: 0,
+        sessions: 0,
+      };
+      setChildren([newChild, ...children]);
+    }
+
     setNewChildName("");
     setNewChildPhase(1);
     setIsAddDialogOpen(false);
+    setIsSaving(false);
   };
 
-  const handleDeleteChild = () => {
+  const handleDeleteChild = async () => {
     if (!childToDelete) return;
+
+    setIsSaving(true);
+
+    if (isDbConfigured && !childToDelete.id.startsWith("demo-") && !childToDelete.id.startsWith("local-")) {
+      try {
+        const res = await fetch(`/api/children/${childToDelete.id}`, {
+          method: "DELETE",
+        });
+
+        if (!res.ok) throw new Error("Failed to delete child");
+      } catch (err) {
+        setError("Failed to delete. Try again.");
+        setIsSaving(false);
+        return;
+      }
+    }
+
     setChildren(children.filter((c) => c.id !== childToDelete.id));
     setChildToDelete(null);
     setIsDeleteDialogOpen(false);
+    setIsSaving(false);
   };
 
   const openDeleteDialog = (child: Child) => {
@@ -86,76 +170,115 @@ export default function ChildrenPage() {
         }
       />
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {children.map((child) => (
-          <Card key={child.id} className="hover:border-[var(--primary)] transition-colors">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <Avatar className="w-14 h-14">
-                    <AvatarFallback className="text-lg">
-                      {child.name[0]}
-                    </AvatarFallback>
-                  </Avatar>
+      {/* Database status banner */}
+      {!isDbConfigured && (
+        <div className="mb-6 p-4 rounded-[var(--radius)] bg-[var(--warning)]/10 border border-[var(--warning)] flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-[var(--warning)] flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-medium text-[var(--warning)]">Demo Mode</p>
+            <p className="text-sm text-[var(--muted-foreground)]">
+              Database not configured. Data won't persist after refresh.{" "}
+              <Link href="https://github.com/uvajed/pecs-learning-platform#database-setup" className="underline">
+                Set up Supabase
+              </Link>{" "}
+              for persistent storage.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {isDbConfigured && (
+        <div className="mb-6 p-4 rounded-[var(--radius)] bg-[var(--success)]/10 border border-[var(--success)] flex items-center gap-3">
+          <Database className="w-5 h-5 text-[var(--success)]" />
+          <p className="text-sm">
+            <span className="font-medium text-[var(--success)]">Connected to database</span>
+            <span className="text-[var(--muted-foreground)]"> - Data is saved automatically</span>
+          </p>
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-6 p-4 rounded-[var(--radius)] bg-[var(--error)]/10 border border-[var(--error)]">
+          <p className="text-sm text-[var(--error)]">{error}</p>
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin w-8 h-8 border-4 border-[var(--primary)] border-t-transparent rounded-full" />
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {children.map((child) => (
+            <Card key={child.id} className="hover:border-[var(--primary)] transition-colors">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-14 h-14">
+                      <AvatarFallback className="text-lg">
+                        {child.name[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="font-semibold text-lg">{child.name}</h3>
+                      <p className="text-sm text-[var(--muted-foreground)]">
+                        Phase {child.current_phase}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon">
+                      <Settings className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openDeleteDialog(child)}
+                      className="text-[var(--error)] hover:text-[var(--error)]"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
                   <div>
-                    <h3 className="font-semibold text-lg">{child.name}</h3>
-                    <p className="text-sm text-[var(--muted-foreground)]">
-                      Phase {child.currentPhase}
-                    </p>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Progress</span>
+                      <span className="font-medium">{child.progress}%</span>
+                    </div>
+                    <Progress value={child.progress} />
                   </div>
+
+                  <p className="text-sm text-[var(--muted-foreground)]">
+                    {child.sessions} sessions completed
+                  </p>
+
+                  <Link href="/practice">
+                    <Button className="w-full mt-2">Start Practice</Button>
+                  </Link>
                 </div>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon">
-                    <Settings className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => openDeleteDialog(child)}
-                    className="text-[var(--error)] hover:text-[var(--error)]"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          {/* Add Child Card */}
+          <Card
+            className="border-dashed hover:border-[var(--primary)] transition-colors cursor-pointer"
+            onClick={() => setIsAddDialogOpen(true)}
+          >
+            <CardContent className="p-6 flex flex-col items-center justify-center min-h-[200px] text-center">
+              <div className="w-14 h-14 rounded-full bg-[var(--muted)] flex items-center justify-center mb-4">
+                <Plus className="w-6 h-6 text-[var(--muted-foreground)]" />
               </div>
-
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Progress</span>
-                    <span className="font-medium">{child.progress}%</span>
-                  </div>
-                  <Progress value={child.progress} />
-                </div>
-
-                <p className="text-sm text-[var(--muted-foreground)]">
-                  {child.sessions} sessions completed
-                </p>
-
-                <Link href="/practice">
-                  <Button className="w-full mt-2">Start Practice</Button>
-                </Link>
-              </div>
+              <h3 className="font-medium">Add a Child</h3>
+              <p className="text-sm text-[var(--muted-foreground)] mt-1">
+                Create a new learner profile
+              </p>
             </CardContent>
           </Card>
-        ))}
-
-        {/* Add Child Card */}
-        <Card
-          className="border-dashed hover:border-[var(--primary)] transition-colors cursor-pointer"
-          onClick={() => setIsAddDialogOpen(true)}
-        >
-          <CardContent className="p-6 flex flex-col items-center justify-center min-h-[200px] text-center">
-            <div className="w-14 h-14 rounded-full bg-[var(--muted)] flex items-center justify-center mb-4">
-              <Plus className="w-6 h-6 text-[var(--muted-foreground)]" />
-            </div>
-            <h3 className="font-medium">Add a Child</h3>
-            <p className="text-sm text-[var(--muted-foreground)] mt-1">
-              Create a new learner profile
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+        </div>
+      )}
 
       {/* Add Child Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -177,6 +300,7 @@ export default function ChildrenPage() {
                 placeholder="Enter name"
                 value={newChildName}
                 onChange={(e) => setNewChildName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddChild()}
                 autoFocus
               />
             </div>
@@ -205,8 +329,8 @@ export default function ChildrenPage() {
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleAddChild} disabled={!newChildName.trim()}>
-              Add Child
+            <Button onClick={handleAddChild} disabled={!newChildName.trim() || isSaving}>
+              {isSaving ? "Saving..." : "Add Child"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -228,9 +352,10 @@ export default function ChildrenPage() {
             </Button>
             <Button
               onClick={handleDeleteChild}
+              disabled={isSaving}
               className="bg-[var(--error)] hover:bg-[var(--error)]/90"
             >
-              Remove
+              {isSaving ? "Removing..." : "Remove"}
             </Button>
           </DialogFooter>
         </DialogContent>
