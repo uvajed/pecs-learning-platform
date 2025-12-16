@@ -13,6 +13,7 @@ A web-based Picture Exchange Communication System (PECS) learning platform desig
 - **Picture Cards** - Visual communication cards with text-to-speech
 - **Progress Tracking** - Track learning progress across sessions
 - **Audio Feedback** - Text-to-speech and success sounds
+- **User Authentication** - Secure login/registration with Supabase Auth
 - **Autism-Friendly Design** - Calming colors, large touch targets, consistent layouts
 
 ## Tech Stack
@@ -57,7 +58,13 @@ The app works without a database in demo mode (data stored locally, lost on refr
 2. Copy the contents of `supabase/schema.sql`
 3. Run the SQL to create tables and policies
 
-### 3. Configure Environment Variables
+### 3. Enable Authentication
+
+1. In your Supabase dashboard, go to Authentication > Providers
+2. Ensure Email provider is enabled
+3. (Optional) Configure email templates in Authentication > Email Templates
+
+### 4. Configure Environment Variables
 
 1. Copy `.env.example` to `.env.local`:
    ```bash

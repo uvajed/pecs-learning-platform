@@ -7,18 +7,13 @@ import { Sidebar } from "./Sidebar";
 
 interface DashboardShellProps {
   children: React.ReactNode;
-  user?: {
-    name: string;
-    email: string;
-    avatarUrl?: string;
-  } | null;
   className?: string;
 }
 
-export function DashboardShell({ children, user, className }: DashboardShellProps) {
+export function DashboardShell({ children, className }: DashboardShellProps) {
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <Header user={user} showNav />
+      <Header showNav />
       <Sidebar />
       <main
         className={cn(

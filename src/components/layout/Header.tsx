@@ -2,25 +2,40 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu, X, User, Settings, LogOut, Volume2, VolumeX } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Menu, X, Settings, LogOut, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
 import { useUIStore } from "@/stores/uiStore";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 interface HeaderProps {
-  user?: {
-    name: string;
-    email: string;
-    avatarUrl?: string;
-  } | null;
   showNav?: boolean;
   className?: string;
 }
 
-export function Header({ user, showNav = true, className }: HeaderProps) {
+export function Header({ showNav = true, className }: HeaderProps) {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
   const { soundEnabled, toggleSound } = useUIStore();
+  const { user, signOut, loading } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    setIsUserMenuOpen(false);
+    router.push("/login");
+  };
+
+  // Get user display name from metadata or email
+  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+  const initials = displayName
+    .split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <header
@@ -79,44 +94,34 @@ export function Header({ user, showNav = true, className }: HeaderProps) {
           </Button>
 
           {/* User menu */}
-          {user ? (
+          {!loading && user ? (
             <div className="relative">
               <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 className="flex items-center gap-2 rounded-full p-1 hover:bg-[var(--muted)] transition-colors"
               >
                 <Avatar>
-                  <AvatarImage src={user.avatarUrl} alt={user.name} />
-                  <AvatarFallback>
-                    {user.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .toUpperCase()}
-                  </AvatarFallback>
+                  <AvatarFallback>{initials}</AvatarFallback>
                 </Avatar>
               </button>
 
-              {isMenuOpen && (
+              {isUserMenuOpen && (
                 <div className="absolute right-0 top-full mt-2 w-56 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] shadow-lg py-2">
                   <div className="px-4 py-2 border-b border-[var(--border)]">
-                    <p className="font-medium">{user.name}</p>
+                    <p className="font-medium">{displayName}</p>
                     <p className="text-sm text-[var(--muted-foreground)]">{user.email}</p>
                   </div>
                   <Link
                     href="/settings"
                     className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--muted)] transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={() => setIsUserMenuOpen(false)}
                   >
                     <Settings className="w-4 h-4" />
                     Settings
                   </Link>
                   <button
                     className="w-full flex items-center gap-2 px-4 py-2 hover:bg-[var(--muted)] transition-colors text-left"
-                    onClick={() => {
-                      // Handle logout
-                      setIsMenuOpen(false);
-                    }}
+                    onClick={handleSignOut}
                   >
                     <LogOut className="w-4 h-4" />
                     Sign out
@@ -124,11 +129,11 @@ export function Header({ user, showNav = true, className }: HeaderProps) {
                 </div>
               )}
             </div>
-          ) : (
+          ) : !loading ? (
             <Link href="/login">
               <Button variant="default">Sign in</Button>
             </Link>
-          )}
+          ) : null}
 
           {/* Mobile menu button */}
           <Button
@@ -168,6 +173,17 @@ export function Header({ user, showNav = true, className }: HeaderProps) {
             >
               Progress
             </Link>
+            {user && (
+              <button
+                className="text-left text-[var(--foreground)] hover:text-[var(--primary)] transition-colors py-2"
+                onClick={() => {
+                  handleSignOut();
+                  setIsMenuOpen(false);
+                }}
+              >
+                Sign out
+              </button>
+            )}
           </div>
         </nav>
       )}
