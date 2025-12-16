@@ -4,8 +4,11 @@ import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PhaseWrapper, PhaseIntro } from "@/components/phases/PhaseWrapper";
 import { Phase1Activity } from "@/components/phases/phase-1/Phase1Activity";
+import { Phase2Activity } from "@/components/phases/phase-2/Phase2Activity";
 import { Phase3Activity } from "@/components/phases/phase-3/Phase3Activity";
 import { Phase4Activity } from "@/components/phases/phase-4/Phase4Activity";
+import { Phase5Activity } from "@/components/phases/phase-5/Phase5Activity";
+import { Phase6Activity } from "@/components/phases/phase-6/Phase6Activity";
 import { useSessionStore } from "@/stores/sessionStore";
 import { PECS_PHASES, type PECSPhase, type Child } from "@/types";
 
@@ -86,15 +89,10 @@ export default function PhasePracticePage() {
         />
       )}
       {phaseId === 2 && (
-        <div className="text-center py-16">
-          <h2 className="text-2xl font-bold mb-4">Phase 2: Distance & Persistence</h2>
-          <p className="text-[var(--muted-foreground)] mb-8">
-            This phase builds on Phase 1 by adding distance between the learner and the communication partner.
-          </p>
-          <p className="text-[var(--muted-foreground)]">
-            Coming soon - practice Phase 1 to build foundational skills.
-          </p>
-        </div>
+        <Phase2Activity
+          onExchange={(card, success) => handleActivity({ card, success })}
+          onComplete={handleComplete}
+        />
       )}
       {phaseId === 3 && (
         <Phase3Activity
@@ -108,18 +106,17 @@ export default function PhasePracticePage() {
           onComplete={handleComplete}
         />
       )}
-      {(phaseId === 5 || phaseId === 6) && (
-        <div className="text-center py-16">
-          <h2 className="text-2xl font-bold mb-4">
-            Phase {phaseId}: {phaseInfo.name}
-          </h2>
-          <p className="text-[var(--muted-foreground)] mb-8">
-            {phaseInfo.description}
-          </p>
-          <p className="text-[var(--muted-foreground)]">
-            Advanced phases coming soon.
-          </p>
-        </div>
+      {phaseId === 5 && (
+        <Phase5Activity
+          onResponse={(cards, time, type) => handleActivity({ cards, time, type })}
+          onComplete={handleComplete}
+        />
+      )}
+      {phaseId === 6 && (
+        <Phase6Activity
+          onComment={(cards, type) => handleActivity({ cards, type })}
+          onComplete={handleComplete}
+        />
       )}
     </PhaseWrapper>
   );
