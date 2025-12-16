@@ -16,44 +16,11 @@ import { cn } from "@/lib/utils";
 import { SuccessAnimation } from "@/components/feedback/SuccessAnimation";
 import { playSound } from "@/lib/audio/sounds";
 import { speakCardLabel } from "@/lib/audio/tts";
+import { FOOD_CARDS, TOY_CARDS, getRandomCards } from "@/lib/cards/cardData";
 import type { PictureCard } from "@/types";
 
-// Sample cards for demo
-const DEMO_CARDS: PictureCard[] = [
-  {
-    id: "1",
-    label: "Cookie",
-    imageUrl: "/cards/cookie.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["food"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    label: "Juice",
-    imageUrl: "/cards/juice.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["food"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    label: "Ball",
-    imageUrl: "/cards/ball.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["toys"],
-    createdAt: new Date().toISOString(),
-  },
-];
+// Get a mix of food and toy cards for Phase 1
+const DEFAULT_CARDS = getRandomCards([...FOOD_CARDS.slice(0, 5), ...TOY_CARDS.slice(0, 5)], 6);
 
 interface DraggableCardProps {
   card: PictureCard;
@@ -142,7 +109,7 @@ interface Phase1ActivityProps {
 }
 
 export function Phase1Activity({
-  cards = DEMO_CARDS,
+  cards = DEFAULT_CARDS,
   onExchange,
   onComplete,
 }: Phase1ActivityProps) {

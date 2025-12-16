@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="40" fill="#fce4ec"/>
+  <path d="M35 30 Q25 30 25 50 Q25 70 35 70 L35 30Z" fill="#e91e63"/>
+  <ellipse cx="40" cy="50" rx="10" ry="20" fill="#ffcc80"/>
+  <path d="M50 35 Q65 35 65 50 Q65 65 50 65" stroke="#e91e63" stroke-width="3" fill="none"/>
+  <path d="M55 40 Q68 40 68 50 Q68 60 55 60" stroke="#e91e63" stroke-width="3" fill="none"/>
+  <path d="M60 45 Q72 45 72 50 Q72 55 60 55" stroke="#e91e63" stroke-width="3" fill="none"/>
+  <text x="50" y="88" text-anchor="middle" fill="#c2185b" font-size="14" font-weight="bold">I HEAR</text>
+</svg>

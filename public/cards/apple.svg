@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <ellipse cx="50" cy="58" rx="35" ry="32" fill="#e53935"/>
+  <ellipse cx="50" cy="58" rx="35" ry="32" fill="url(#appleShine)"/>
+  <path d="M50 26 Q55 18 52 10" stroke="#5d4037" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="58" cy="18" rx="8" ry="5" fill="#4caf50" transform="rotate(30 58 18)"/>
+  <defs>
+    <radialGradient id="appleShine" cx="35%" cy="35%">
+      <stop offset="0%" stop-color="#ff6659" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#e53935" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>

@@ -6,54 +6,13 @@ import { cn } from "@/lib/utils";
 import { SuccessAnimation, CheckmarkAnimation } from "@/components/feedback/SuccessAnimation";
 import { playSound } from "@/lib/audio/sounds";
 import { speakCardLabel, speak } from "@/lib/audio/tts";
+import { FOOD_CARDS, TOY_CARDS } from "@/lib/cards/cardData";
 import type { PictureCard } from "@/types";
 
-// Sample cards for discrimination
-const DEMO_CARDS: PictureCard[] = [
-  {
-    id: "cookie",
-    label: "Cookie",
-    imageUrl: "/cards/cookie.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["food"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "juice",
-    label: "Juice",
-    imageUrl: "/cards/juice.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["food"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "ball",
-    label: "Ball",
-    imageUrl: "/cards/ball.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["toys"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "book",
-    label: "Book",
-    imageUrl: "/cards/book.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["toys"],
-    createdAt: new Date().toISOString(),
-  },
+// Get a variety of cards for Phase 3 discrimination
+const DEFAULT_CARDS: PictureCard[] = [
+  ...FOOD_CARDS.slice(0, 6),
+  ...TOY_CARDS.slice(0, 6),
 ];
 
 interface Phase3ActivityProps {
@@ -64,7 +23,7 @@ interface Phase3ActivityProps {
 }
 
 export function Phase3Activity({
-  cards = DEMO_CARDS,
+  cards = DEFAULT_CARDS,
   arraySize = 3,
   onAnswer,
   onComplete,

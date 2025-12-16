@@ -17,68 +17,14 @@ import { SuccessAnimation } from "@/components/feedback/SuccessAnimation";
 import { playSound } from "@/lib/audio/sounds";
 import { speak } from "@/lib/audio/tts";
 import { Button } from "@/components/ui/Button";
+import { FOOD_CARDS, TOY_CARDS, STARTER_CARDS, getRandomCards } from "@/lib/cards/cardData";
 import type { PictureCard } from "@/types";
 
-// Sentence starter card
-const I_WANT_CARD: PictureCard = {
-  id: "i-want",
-  label: "I want",
-  imageUrl: "/cards/i-want.svg",
-  ttsEnabled: true,
-  isSystem: true,
-  isPublic: true,
-  cardType: "sentence_starter",
-  categoryIds: ["starters"],
-  createdAt: new Date().toISOString(),
-};
+// Sentence starter card - "I want"
+const I_WANT_CARD = STARTER_CARDS.find(c => c.id === "i-want")!;
 
-// Sample item cards
-const DEMO_CARDS: PictureCard[] = [
-  {
-    id: "cookie",
-    label: "cookie",
-    imageUrl: "/cards/cookie.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["food"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "juice",
-    label: "juice",
-    imageUrl: "/cards/juice.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["food"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "ball",
-    label: "ball",
-    imageUrl: "/cards/ball.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["toys"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "book",
-    label: "book",
-    imageUrl: "/cards/book.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["toys"],
-    createdAt: new Date().toISOString(),
-  },
-];
+// Get a variety of item cards for Phase 5
+const DEFAULT_CARDS = getRandomCards([...FOOD_CARDS, ...TOY_CARDS], 8);
 
 type TrialType = "prompted" | "spontaneous";
 
@@ -176,7 +122,7 @@ interface Phase5ActivityProps {
 }
 
 export function Phase5Activity({
-  itemCards = DEMO_CARDS,
+  itemCards = DEFAULT_CARDS,
   onResponse,
   onComplete,
 }: Phase5ActivityProps) {

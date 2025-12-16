@@ -7,6 +7,16 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { speakCardLabel } from "@/lib/audio/tts";
+import {
+  FOOD_CARDS,
+  TOY_CARDS,
+  ACTION_CARDS,
+  PEOPLE_CARDS,
+  FEELING_CARDS,
+  PLACE_CARDS,
+  STARTER_CARDS,
+  CARD_CATEGORIES
+} from "@/lib/cards/cardData";
 import Image from "next/image";
 
 const mockUser = {
@@ -14,21 +24,24 @@ const mockUser = {
   email: "sarah@example.com",
 };
 
-const categories = ["All", "Food", "Toys", "Actions", "Feelings", "Places"];
+const categories = ["All", "Food", "Toys", "Actions", "People", "Feelings", "Places", "Starters"];
 
-const mockCards = [
-  { id: "1", label: "Cookie", imageUrl: "/cards/cookie.svg", category: "Food" },
-  { id: "2", label: "Juice", imageUrl: "/cards/juice.svg", category: "Food" },
-  { id: "3", label: "Ball", imageUrl: "/cards/ball.svg", category: "Toys" },
-  { id: "4", label: "Book", imageUrl: "/cards/book.svg", category: "Toys" },
-  { id: "5", label: "I want", imageUrl: "/cards/i-want.svg", category: "Actions" },
+// Transform card data to include category for filtering
+const allCards = [
+  ...FOOD_CARDS.map(c => ({ ...c, category: "Food" })),
+  ...TOY_CARDS.map(c => ({ ...c, category: "Toys" })),
+  ...ACTION_CARDS.map(c => ({ ...c, category: "Actions" })),
+  ...PEOPLE_CARDS.map(c => ({ ...c, category: "People" })),
+  ...FEELING_CARDS.map(c => ({ ...c, category: "Feelings" })),
+  ...PLACE_CARDS.map(c => ({ ...c, category: "Places" })),
+  ...STARTER_CARDS.map(c => ({ ...c, category: "Starters" })),
 ];
 
 export default function CardsPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredCards = mockCards.filter((card) => {
+  const filteredCards = allCards.filter((card) => {
     const matchesCategory = selectedCategory === "All" || card.category === selectedCategory;
     const matchesSearch = card.label.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;

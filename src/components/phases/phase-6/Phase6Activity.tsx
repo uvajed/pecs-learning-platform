@@ -17,80 +17,15 @@ import { SuccessAnimation } from "@/components/feedback/SuccessAnimation";
 import { playSound } from "@/lib/audio/sounds";
 import { speak } from "@/lib/audio/tts";
 import { Button } from "@/components/ui/Button";
+import { FOOD_CARDS, TOY_CARDS, STARTER_CARDS, getRandomCards } from "@/lib/cards/cardData";
 import type { PictureCard } from "@/types";
 
-// Comment starter cards
-const I_SEE_CARD: PictureCard = {
-  id: "i-see",
-  label: "I see",
-  imageUrl: "/cards/i-want.svg", // We'll use i-want icon as placeholder
-  ttsEnabled: true,
-  isSystem: true,
-  isPublic: true,
-  cardType: "sentence_starter",
-  categoryIds: ["starters"],
-  createdAt: new Date().toISOString(),
-};
+// Comment starter cards - "I see" and "I hear"
+const I_SEE_CARD = STARTER_CARDS.find(c => c.id === "i-see")!;
+const I_HEAR_CARD = STARTER_CARDS.find(c => c.id === "i-hear")!;
 
-const I_HEAR_CARD: PictureCard = {
-  id: "i-hear",
-  label: "I hear",
-  imageUrl: "/cards/i-want.svg",
-  ttsEnabled: true,
-  isSystem: true,
-  isPublic: true,
-  cardType: "sentence_starter",
-  categoryIds: ["starters"],
-  createdAt: new Date().toISOString(),
-};
-
-// Sample item cards
-const VISUAL_CARDS: PictureCard[] = [
-  {
-    id: "cookie",
-    label: "cookie",
-    imageUrl: "/cards/cookie.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["food"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "juice",
-    label: "juice",
-    imageUrl: "/cards/juice.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["food"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "ball",
-    label: "ball",
-    imageUrl: "/cards/ball.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["toys"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "book",
-    label: "book",
-    imageUrl: "/cards/book.svg",
-    ttsEnabled: true,
-    isSystem: true,
-    isPublic: true,
-    cardType: "noun",
-    categoryIds: ["toys"],
-    createdAt: new Date().toISOString(),
-  },
-];
+// Get a variety of item cards for Phase 6 commenting
+const DEFAULT_CARDS = getRandomCards([...FOOD_CARDS, ...TOY_CARDS], 8);
 
 type StimulusType = "visual" | "auditory";
 
@@ -231,7 +166,7 @@ interface Phase6ActivityProps {
 }
 
 export function Phase6Activity({
-  itemCards = VISUAL_CARDS,
+  itemCards = DEFAULT_CARDS,
   onComment,
   onComplete,
 }: Phase6ActivityProps) {

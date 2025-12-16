@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="25" y="30" width="50" height="60" rx="5" fill="#fff" stroke="#e0e0e0" stroke-width="2"/>
+  <rect x="30" y="20" width="40" height="15" rx="3" fill="#fff" stroke="#e0e0e0" stroke-width="2"/>
+  <polygon points="35,20 50,8 65,20" fill="#1e88e5"/>
+  <rect x="30" y="45" width="40" height="35" rx="3" fill="#1e88e5"/>
+  <text x="50" y="68" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">MILK</text>
+</svg>

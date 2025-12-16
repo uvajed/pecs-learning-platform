@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <circle cx="50" cy="45" r="35" fill="#fff3e0"/>
+  <path d="M50 20 Q30 30 30 50 Q30 70 50 75 Q70 70 70 50 Q70 30 50 20Z" fill="#f44336"/>
+  <circle cx="40" cy="45" r="5" fill="#fff" opacity="0.5"/>
+  <text x="50" y="90" text-anchor="middle" fill="#c62828" font-size="14" font-weight="bold">I FEEL</text>
+</svg>
