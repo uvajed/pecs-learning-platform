@@ -16,13 +16,14 @@ const mockUser = {
 };
 
 // Mock progress - in real app, this would come from the database
+// All phases unlocked so users can practice any phase
 const mockProgress: Record<number, "locked" | "in_progress" | "completed"> = {
-  1: "completed",
+  1: "in_progress",
   2: "in_progress",
-  3: "locked",
-  4: "locked",
-  5: "locked",
-  6: "locked",
+  3: "in_progress",
+  4: "in_progress",
+  5: "in_progress",
+  6: "in_progress",
 };
 
 export default function PracticePage() {
