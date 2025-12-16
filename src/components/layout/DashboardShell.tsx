@@ -22,7 +22,7 @@ export function DashboardShell({ children, user, className }: DashboardShellProp
       <Sidebar />
       <main
         className={cn(
-          "lg:pl-64 pt-4 pb-8 px-4 md:px-6 lg:px-8 min-h-[calc(100vh-4rem)]",
+          "pt-4 pb-8 px-4 md:px-6 lg:ml-64 lg:px-8 min-h-[calc(100vh-4rem)]",
           className
         )}
       >
