@@ -1,26 +1,141 @@
 @import "tailwindcss";
 
+/* Autism-Friendly Color Palette */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Core colors - calm and soothing */
+  --background: #F5F5F0;
+  --foreground: #333333;
+
+  /* Primary - muted green (calming) */
+  --primary: #5B8A72;
+  --primary-foreground: #FFFFFF;
+  --primary-hover: #4A7A62;
+
+  /* Secondary - soft blue (peaceful) */
+  --secondary: #7BA3B8;
+  --secondary-foreground: #FFFFFF;
+  --secondary-hover: #6A93A8;
+
+  /* Accent - warm orange (encouraging) */
+  --accent: #E8B87D;
+  --accent-foreground: #333333;
+
+  /* Success - gentle green */
+  --success: #7DB87D;
+  --success-foreground: #FFFFFF;
+
+  /* Warning - soft yellow */
+  --warning: #E8D687;
+  --warning-foreground: #333333;
+
+  /* Error - muted coral (not alarming) */
+  --error: #D4897D;
+  --error-foreground: #FFFFFF;
+
+  /* Surface colors */
+  --card: #FFFFFF;
+  --card-foreground: #333333;
+  --muted: #E8E8E3;
+  --muted-foreground: #666666;
+  --border: #D1D1C9;
+
+  /* Input */
+  --input: #FFFFFF;
+  --input-border: #C1C1B9;
+  --ring: #5B8A72;
+
+  /* Radius - rounded for softer appearance */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+/* High contrast mode for accessibility */
+@media (prefers-contrast: high) {
+  :root {
+    --background: #FFFFFF;
+    --foreground: #000000;
+    --primary: #2E5A42;
+    --border: #000000;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius: var(--radius);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Base styles */
+* {
+  border-color: var(--border);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Large touch targets for accessibility */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.touch-target-lg {
+  min-width: 88px;
+  min-height: 88px;
+}
+
+/* Card shadows - subtle depth */
+.card-shadow {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card-shadow-hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Selection highlight - softer */
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
