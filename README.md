@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PECS Learning Platform
+
+A web-based Picture Exchange Communication System (PECS) learning platform designed for children with autism and their support network (parents, therapists, educators).
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fuvajed%2Fpecs-learning-platform)
+
+## Features
+
+- **All 6 PECS Phases** - Interactive activities for each phase of the PECS curriculum
+  - Phase 1: Physical Exchange (drag-and-drop)
+  - Phase 3: Picture Discrimination (select from array)
+  - Phase 4: Sentence Structure (build "I want ___" sentences)
+- **Picture Cards** - Visual communication cards with text-to-speech
+- **Progress Tracking** - Track learning progress across sessions
+- **Audio Feedback** - Text-to-speech and success sounds
+- **Autism-Friendly Design** - Calming colors, large touch targets, consistent layouts
+
+## Tech Stack
+
+- Next.js 16 with App Router
+- React 19, TypeScript
+- Tailwind CSS v4
+- @dnd-kit for drag-and-drop
+- Radix UI for accessible components
+- Zustand for state management
+- Framer Motion for animations
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build for production
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deploy
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### One-Click Deploy
 
-## Learn More
+Click the button above to deploy your own instance to Vercel.
 
-To learn more about Next.js, take a look at the following resources:
+### Manual Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Fork this repository
+2. Import to [Vercel](https://vercel.com/new)
+3. Deploy automatically on push
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
