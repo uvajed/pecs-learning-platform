@@ -22,21 +22,37 @@ const defaultOptions: TTSOptions = {
 };
 
 // Priority list of natural-sounding voices (ordered by preference)
+// Enhanced/Premium versions should be listed first as they sound much better
 const PREFERRED_VOICES = [
-  // Premium/Neural voices (most natural)
+  // macOS Enhanced voices (highest quality, most natural)
+  "Samantha (Enhanced)",
+  "Samantha (Premium)",
+  "Evan (Enhanced)",
+  "Evan (Premium)",
+  "Karen (Enhanced)",
+  "Karen (Premium)",
+  "Daniel (Enhanced)",
+  "Daniel (Premium)",
+  "Moira (Enhanced)",
+  "Fiona (Enhanced)",
+  "Victoria (Enhanced)",
+  "Tessa (Enhanced)",
+  // Google/Microsoft neural voices
   "Google US English",
   "Google UK English Female",
   "Microsoft Zira",
   "Microsoft Jenny",
-  "Samantha", // macOS
-  "Karen", // macOS Australian
-  "Moira", // macOS Irish
-  "Fiona", // macOS Scottish
-  "Victoria", // macOS
-  "Tessa", // macOS South African
-  // Fallbacks
-  "Alex", // macOS
-  "Daniel", // macOS British
+  "Microsoft Aria",
+  // Standard macOS voices (fallback)
+  "Samantha",
+  "Evan",
+  "Karen",
+  "Moira",
+  "Fiona",
+  "Victoria",
+  "Tessa",
+  "Alex",
+  "Daniel",
 ];
 
 function selectBestVoice(): SpeechSynthesisVoice | null {
@@ -165,17 +181,23 @@ export function getChildFriendlyVoices(): SpeechSynthesisVoice[] {
     const name = voice.name.toLowerCase();
     // Exclude robotic/low-quality voices
     if (name.includes("espeak") || name.includes("compact")) return false;
-    // Include known good voices
+    // Include known good voices - prioritize enhanced/premium
     return PREFERRED_VOICES.some(pref => voice.name.includes(pref)) ||
       name.includes("premium") ||
       name.includes("enhanced") ||
       name.includes("neural") ||
-      name.includes("natural") ||
-      name.includes("female") ||
-      name.includes("samantha") ||
-      name.includes("karen") ||
-      name.includes("victoria");
+      name.includes("natural");
   });
+
+  // Sort to put enhanced/premium voices first
+  friendlyVoices.sort((a, b) => {
+    const aEnhanced = a.name.toLowerCase().includes("enhanced") || a.name.toLowerCase().includes("premium");
+    const bEnhanced = b.name.toLowerCase().includes("enhanced") || b.name.toLowerCase().includes("premium");
+    if (aEnhanced && !bEnhanced) return -1;
+    if (!aEnhanced && bEnhanced) return 1;
+    return 0;
+  });
+
   return friendlyVoices.length > 0 ? friendlyVoices : voices.filter(v => v.lang.startsWith("en"));
 }
 
