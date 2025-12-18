@@ -147,16 +147,24 @@ export default function HomePage() {
               </>
             ) : (
               <div className="text-center py-4">
-                <div className="w-12 h-12 rounded-full bg-[var(--muted)] flex items-center justify-center mx-auto mb-3">
-                  <UserPlus className="w-6 h-6 text-[var(--muted-foreground)]" />
+                <div className="w-12 h-12 rounded-full bg-[var(--primary)] flex items-center justify-center mx-auto mb-3">
+                  <Play className="w-6 h-6 text-white" />
                 </div>
-                <p className="text-[var(--muted-foreground)] mb-3">No children profiles yet</p>
-                <Link href="/children">
-                  <Button>
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Add First Child
-                  </Button>
-                </Link>
+                <p className="text-[var(--muted-foreground)] mb-3">Ready to try PECS?</p>
+                <div className="space-y-2">
+                  <Link href="/practice">
+                    <Button className="w-full">
+                      <Play className="w-4 h-4 mr-2" />
+                      Try as Guest
+                    </Button>
+                  </Link>
+                  <Link href="/children">
+                    <Button variant="outline" className="w-full">
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Create Profile
+                    </Button>
+                  </Link>
+                </div>
               </div>
             )}
           </CardContent>

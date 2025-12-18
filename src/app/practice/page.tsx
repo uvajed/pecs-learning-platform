@@ -30,6 +30,7 @@ export default function PracticePage() {
   const [children, setChildren] = React.useState<Child[]>([]);
   const [selectedChild, setSelectedChild] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [guestMode, setGuestMode] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchChildren() {
@@ -51,8 +52,8 @@ export default function PracticePage() {
     fetchChildren();
   }, []);
 
-  // Show prompt to create a child if none exist
-  if (!isLoading && children.length === 0) {
+  // Show guest mode prompt if no children exist and not already in guest mode
+  if (!isLoading && children.length === 0 && !guestMode) {
     return (
       <DashboardShell>
         <PageHeader
@@ -69,30 +70,38 @@ export default function PracticePage() {
         />
         <Card className="max-w-md mx-auto mt-12">
           <CardContent className="p-8 text-center">
-            <div className="w-16 h-16 rounded-full bg-[var(--muted)] flex items-center justify-center mx-auto mb-4">
-              <UserPlus className="w-8 h-8 text-[var(--muted-foreground)]" />
+            <div className="w-16 h-16 rounded-full bg-[var(--primary)] flex items-center justify-center mx-auto mb-4">
+              <Play className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Create a Profile First</h3>
+            <h3 className="text-xl font-semibold mb-2">Ready to Practice?</h3>
             <p className="text-[var(--muted-foreground)] mb-6">
-              Add a child profile to start practicing PECS phases.
+              Try PECS phases as a guest or create a profile to track progress.
             </p>
-            <Link href="/children">
-              <Button size="lg">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Add Child Profile
+            <div className="space-y-3">
+              <Button size="lg" className="w-full" onClick={() => setGuestMode(true)}>
+                <Play className="w-4 h-4 mr-2" />
+                Try as Guest
               </Button>
-            </Link>
+              <Link href="/children" className="block">
+                <Button size="lg" variant="outline" className="w-full">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Create Profile
+                </Button>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </DashboardShell>
     );
   }
 
+  const isGuestSession = guestMode || children.length === 0;
+
   return (
     <DashboardShell>
       <PageHeader
         title="Practice Session"
-        description={selectedChild ? `Choose a phase to practice with ${selectedChild}` : "Choose a phase to practice"}
+        description={isGuestSession ? "Guest Mode - Choose a phase to practice" : selectedChild ? `Choose a phase to practice with ${selectedChild}` : "Choose a phase to practice"}
         action={
           <Link href="/">
             <Button variant="outline">
@@ -103,8 +112,8 @@ export default function PracticePage() {
         }
       />
 
-      {/* Child selector */}
-      {children.length > 0 && (
+      {/* Child selector - hidden in guest mode */}
+      {children.length > 0 && !guestMode && (
         <div className="mb-8">
           <label className="block text-sm font-medium mb-2">
             Practicing with:
