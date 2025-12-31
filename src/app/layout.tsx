@@ -15,6 +15,31 @@ export const metadata: Metadata = {
   keywords: ["PECS", "autism", "communication", "AAC", "learning", "children"],
   authors: [{ name: "PECS Learn" }],
   manifest: "/manifest.json",
+  metadataBase: new URL("https://pecs-platform.vercel.app"),
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://pecs-platform.vercel.app",
+    siteName: "PECS Learn",
+    title: "PECS Learn - Picture Exchange Communication System",
+    description:
+      "A learning platform for the Picture Exchange Communication System (PECS), designed for children with autism and their support network.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "PECS Learn",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PECS Learn - Picture Exchange Communication System",
+    description:
+      "A learning platform for PECS, designed for children with autism.",
+    images: ["/og-image.png"],
+  },
 };
 
 export const viewport: Viewport = {
