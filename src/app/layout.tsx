@@ -33,7 +33,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <footer className="fixed bottom-2 left-1/2 -translate-x-1/2 text-xs opacity-40 z-10">
+            Powered by <a href="https://www.e-studios.net" target="_blank" rel="noopener" className="underline">e·studios</a>
+          </footer>
+        </Providers>
       </body>
     </html>
   );
