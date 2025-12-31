@@ -23,6 +23,16 @@ export function DashboardShell({ children, className }: DashboardShellProps) {
       >
         <div className="mx-auto max-w-7xl">{children}</div>
       </main>
+      <footer className="py-4 text-center text-sm opacity-60 lg:ml-64">
+        Powered by{" "}
+        <a href="https://www.e-studios.net" target="_blank" rel="noopener" className="underline">
+          e·studios
+        </a>
+        <span className="mx-2">•</span>
+        <a href="https://paypal.me/elvisbrahm" target="_blank" rel="noopener" className="underline">
+          Donate ❤️
+        </a>
+      </footer>
     </div>
   );
 }

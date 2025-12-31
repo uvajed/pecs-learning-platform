@@ -202,3 +202,300 @@ export interface DailyStats {
   independentResponses: number;
   promptedResponses: number;
 }
+
+// Achievement System
+export type AchievementCategory = 'milestone' | 'streak' | 'effort' | 'mastery' | 'special' | 'category';
+
+export interface AchievementDefinition {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: AchievementCategory;
+  criteria: AchievementCriteria;
+}
+
+export interface AchievementCriteria {
+  type: 'count' | 'streak' | 'phase' | 'accuracy' | 'first' | 'speed' | 'time' | 'weekend' | 'comeback' | 'category';
+  target?: number;
+  activityType?: ActivityType;
+  phaseId?: PECSPhase;
+  categoryId?: string;
+}
+
+export interface EarnedAchievement {
+  id: string;
+  childId: string;
+  achievementType: string;
+  earnedAt: string;
+  metadata?: Record<string, unknown>;
+}
+
+// Achievement definitions
+export const ACHIEVEMENTS: Record<string, AchievementDefinition> = {
+  // Milestone achievements
+  FIRST_EXCHANGE: {
+    id: 'FIRST_EXCHANGE',
+    name: 'First Exchange',
+    description: 'Complete your first picture exchange',
+    icon: '🌟',
+    category: 'milestone',
+    criteria: { type: 'first', activityType: 'exchange_success' },
+  },
+  FIRST_SENTENCE: {
+    id: 'FIRST_SENTENCE',
+    name: 'First Sentence',
+    description: 'Build your first sentence',
+    icon: '💬',
+    category: 'milestone',
+    criteria: { type: 'first', activityType: 'sentence_built' },
+  },
+  FIRST_COMMENT: {
+    id: 'FIRST_COMMENT',
+    name: 'First Comment',
+    description: 'Make your first comment',
+    icon: '🗣️',
+    category: 'milestone',
+    criteria: { type: 'first', activityType: 'comment_made' },
+  },
+  PHASE_1_COMPLETE: {
+    id: 'PHASE_1_COMPLETE',
+    name: 'Phase 1 Master',
+    description: 'Complete Phase 1: How to Communicate',
+    icon: '🏆',
+    category: 'milestone',
+    criteria: { type: 'phase', phaseId: 1 },
+  },
+  PHASE_2_COMPLETE: {
+    id: 'PHASE_2_COMPLETE',
+    name: 'Phase 2 Master',
+    description: 'Complete Phase 2: Distance and Persistence',
+    icon: '🏆',
+    category: 'milestone',
+    criteria: { type: 'phase', phaseId: 2 },
+  },
+  PHASE_3_COMPLETE: {
+    id: 'PHASE_3_COMPLETE',
+    name: 'Phase 3 Master',
+    description: 'Complete Phase 3: Picture Discrimination',
+    icon: '🏆',
+    category: 'milestone',
+    criteria: { type: 'phase', phaseId: 3 },
+  },
+  PHASE_4_COMPLETE: {
+    id: 'PHASE_4_COMPLETE',
+    name: 'Phase 4 Master',
+    description: 'Complete Phase 4: Sentence Structure',
+    icon: '🏆',
+    category: 'milestone',
+    criteria: { type: 'phase', phaseId: 4 },
+  },
+  PHASE_5_COMPLETE: {
+    id: 'PHASE_5_COMPLETE',
+    name: 'Phase 5 Master',
+    description: 'Complete Phase 5: Responsive Requesting',
+    icon: '🏆',
+    category: 'milestone',
+    criteria: { type: 'phase', phaseId: 5 },
+  },
+  PHASE_6_COMPLETE: {
+    id: 'PHASE_6_COMPLETE',
+    name: 'PECS Graduate',
+    description: 'Complete all 6 PECS phases!',
+    icon: '🎓',
+    category: 'milestone',
+    criteria: { type: 'phase', phaseId: 6 },
+  },
+
+  // Streak achievements
+  STREAK_3: {
+    id: 'STREAK_3',
+    name: '3-Day Streak',
+    description: 'Practice for 3 days in a row',
+    icon: '🔥',
+    category: 'streak',
+    criteria: { type: 'streak', target: 3 },
+  },
+  STREAK_7: {
+    id: 'STREAK_7',
+    name: 'Week Warrior',
+    description: 'Practice for 7 days in a row',
+    icon: '⚡',
+    category: 'streak',
+    criteria: { type: 'streak', target: 7 },
+  },
+  STREAK_14: {
+    id: 'STREAK_14',
+    name: 'Two Week Champion',
+    description: 'Practice for 14 days in a row',
+    icon: '💪',
+    category: 'streak',
+    criteria: { type: 'streak', target: 14 },
+  },
+  STREAK_30: {
+    id: 'STREAK_30',
+    name: 'Monthly Champion',
+    description: 'Practice for 30 days in a row',
+    icon: '👑',
+    category: 'streak',
+    criteria: { type: 'streak', target: 30 },
+  },
+
+  // Effort achievements
+  SESSIONS_5: {
+    id: 'SESSIONS_5',
+    name: 'Getting Started',
+    description: 'Complete 5 practice sessions',
+    icon: '🚀',
+    category: 'effort',
+    criteria: { type: 'count', target: 5 },
+  },
+  SESSIONS_25: {
+    id: 'SESSIONS_25',
+    name: 'Dedicated Learner',
+    description: 'Complete 25 practice sessions',
+    icon: '📚',
+    category: 'effort',
+    criteria: { type: 'count', target: 25 },
+  },
+  SESSIONS_100: {
+    id: 'SESSIONS_100',
+    name: 'Practice Pro',
+    description: 'Complete 100 practice sessions',
+    icon: '🌟',
+    category: 'effort',
+    criteria: { type: 'count', target: 100 },
+  },
+  EXCHANGES_50: {
+    id: 'EXCHANGES_50',
+    name: 'Communicator',
+    description: 'Complete 50 successful exchanges',
+    icon: '🤝',
+    category: 'effort',
+    criteria: { type: 'count', target: 50, activityType: 'exchange_success' },
+  },
+  EXCHANGES_200: {
+    id: 'EXCHANGES_200',
+    name: 'Super Communicator',
+    description: 'Complete 200 successful exchanges',
+    icon: '⭐',
+    category: 'effort',
+    criteria: { type: 'count', target: 200, activityType: 'exchange_success' },
+  },
+
+  // Mastery achievements
+  PERFECT_SESSION: {
+    id: 'PERFECT_SESSION',
+    name: 'Perfect Practice',
+    description: 'Complete a session with 100% accuracy',
+    icon: '✨',
+    category: 'mastery',
+    criteria: { type: 'accuracy', target: 100 },
+  },
+  INDEPENDENT_10: {
+    id: 'INDEPENDENT_10',
+    name: 'Independent Learner',
+    description: 'Complete 10 exchanges independently',
+    icon: '🎯',
+    category: 'mastery',
+    criteria: { type: 'count', target: 10 },
+  },
+  FAST_RESPONDER: {
+    id: 'FAST_RESPONDER',
+    name: 'Quick Thinker',
+    description: 'Complete 10 exchanges in under 3 seconds each',
+    icon: '⚡',
+    category: 'mastery',
+    criteria: { type: 'speed', target: 3000 },
+  },
+  CARD_MASTER_10: {
+    id: 'CARD_MASTER_10',
+    name: 'Card Collector',
+    description: 'Successfully use 10 different cards',
+    icon: '🃏',
+    category: 'mastery',
+    criteria: { type: 'count', target: 10 },
+  },
+  CARD_MASTER_25: {
+    id: 'CARD_MASTER_25',
+    name: 'Card Expert',
+    description: 'Successfully use 25 different cards',
+    icon: '🎴',
+    category: 'mastery',
+    criteria: { type: 'count', target: 25 },
+  },
+
+  // Special achievements
+  EARLY_BIRD: {
+    id: 'EARLY_BIRD',
+    name: 'Early Bird',
+    description: 'Complete a session before 9 AM',
+    icon: '🌅',
+    category: 'special',
+    criteria: { type: 'time', target: 9 },
+  },
+  NIGHT_OWL: {
+    id: 'NIGHT_OWL',
+    name: 'Night Owl',
+    description: 'Complete a session after 8 PM',
+    icon: '🦉',
+    category: 'special',
+    criteria: { type: 'time', target: 20 },
+  },
+  WEEKEND_WARRIOR: {
+    id: 'WEEKEND_WARRIOR',
+    name: 'Weekend Warrior',
+    description: 'Practice on both Saturday and Sunday',
+    icon: '🎉',
+    category: 'special',
+    criteria: { type: 'weekend' },
+  },
+  COMEBACK_KID: {
+    id: 'COMEBACK_KID',
+    name: 'Comeback Kid',
+    description: 'Resume practice after 7+ days away',
+    icon: '💪',
+    category: 'special',
+    criteria: { type: 'comeback', target: 7 },
+  },
+
+  // Category achievements
+  FOOD_LOVER: {
+    id: 'FOOD_LOVER',
+    name: 'Food Lover',
+    description: 'Successfully use all food category cards',
+    icon: '🍎',
+    category: 'category',
+    criteria: { type: 'category', categoryId: 'food' },
+  },
+  TOY_MASTER: {
+    id: 'TOY_MASTER',
+    name: 'Toy Master',
+    description: 'Successfully use all toy category cards',
+    icon: '🧸',
+    category: 'category',
+    criteria: { type: 'category', categoryId: 'toys' },
+  },
+  SOCIAL_BUTTERFLY: {
+    id: 'SOCIAL_BUTTERFLY',
+    name: 'Social Butterfly',
+    description: 'Successfully use all people category cards',
+    icon: '👨‍👩‍👧',
+    category: 'category',
+    criteria: { type: 'category', categoryId: 'people' },
+  },
+};
+
+// Streak info
+export interface StreakInfo {
+  currentStreak: number;
+  longestStreak: number;
+  lastActivityDate: string | null;
+  streakProtected?: boolean;
+  // Computed fields for UI display
+  daysUntilStreakLoss?: number;
+  statusMessage?: string;
+}
+
+// Re-export database types
+export type { Database, UserProfile, DBChild, DBSession, DBActivity, DBAchievement, DBStreak, ChildStats } from './database';

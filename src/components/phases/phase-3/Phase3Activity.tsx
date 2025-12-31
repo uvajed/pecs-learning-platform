@@ -2,11 +2,13 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { SuccessAnimation, CheckmarkAnimation } from "@/components/feedback/SuccessAnimation";
 import { playSound } from "@/lib/audio/sounds";
 import { speakCardLabel, speak } from "@/lib/audio/tts";
 import { FOOD_CARDS, TOY_CARDS } from "@/lib/cards/cardData";
+import { useAdaptiveDifficulty } from "@/hooks/useAdaptiveDifficulty";
 import type { PictureCard } from "@/types";
 
 // Get a variety of cards for Phase 3 discrimination
@@ -17,16 +19,20 @@ const DEFAULT_CARDS: PictureCard[] = [
 
 interface Phase3ActivityProps {
   cards?: PictureCard[];
-  arraySize?: 2 | 3 | 4 | 5;
+  initialArraySize?: 2 | 3 | 4 | 5;
+  adaptiveDifficulty?: boolean;
   onAnswer?: (selectedCard: PictureCard, targetCard: PictureCard, isCorrect: boolean) => void;
   onComplete?: () => void;
+  onDifficultyChange?: (newSize: number, message: string) => void;
 }
 
 export function Phase3Activity({
   cards = DEFAULT_CARDS,
-  arraySize = 3,
+  initialArraySize = 2,
+  adaptiveDifficulty = true,
   onAnswer,
   onComplete,
+  onDifficultyChange,
 }: Phase3ActivityProps) {
   const [targetCard, setTargetCard] = React.useState<PictureCard | null>(null);
   const [displayCards, setDisplayCards] = React.useState<PictureCard[]>([]);
@@ -35,6 +41,29 @@ export function Phase3Activity({
   const [showSuccess, setShowSuccess] = React.useState(false);
   const [correctCount, setCorrectCount] = React.useState(0);
   const [totalTrials, setTotalTrials] = React.useState(0);
+  const [difficultyMessage, setDifficultyMessage] = React.useState<string | null>(null);
+  const trialStartTime = React.useRef<number>(0);
+
+  // Adaptive difficulty hook
+  const {
+    currentDifficulty,
+    successRate,
+    trend,
+    recordTrial,
+  } = useAdaptiveDifficulty({
+    initialDifficulty: initialArraySize,
+    onDifficultyChange: (newDifficulty, message) => {
+      setDifficultyMessage(message);
+      onDifficultyChange?.(newDifficulty, message);
+      // Clear message after 3 seconds
+      setTimeout(() => setDifficultyMessage(null), 3000);
+    },
+  });
+
+  // Use adaptive difficulty or fixed
+  const arraySize = adaptiveDifficulty
+    ? (currentDifficulty as 2 | 3 | 4 | 5)
+    : initialArraySize;
 
   // Initialize a new trial
   const startNewTrial = React.useCallback(() => {
@@ -55,6 +84,9 @@ export function Phase3Activity({
     setSelectedCard(null);
     setIsCorrect(null);
 
+    // Track trial start time for response time measurement
+    trialStartTime.current = Date.now();
+
     // Speak the prompt
     setTimeout(() => {
       speak(`Find the ${target.label}`);
@@ -69,10 +101,18 @@ export function Phase3Activity({
   const handleCardSelect = async (card: PictureCard) => {
     if (selectedCard) return; // Already selected
 
+    // Calculate response time
+    const responseTimeMs = Date.now() - trialStartTime.current;
+
     setSelectedCard(card);
     const correct = card.id === targetCard?.id;
     setIsCorrect(correct);
     setTotalTrials((prev) => prev + 1);
+
+    // Record trial for adaptive difficulty
+    if (adaptiveDifficulty) {
+      recordTrial(correct, responseTimeMs);
+    }
 
     playSound(correct ? "success" : "error", 0.6);
 
@@ -110,13 +150,57 @@ export function Phase3Activity({
     startNewTrial();
   };
 
+  // Trend indicator
+  const trendIcon = trend === 'improving' ? '📈' : trend === 'declining' ? '📉' : '➡️';
+
   return (
     <div className="flex flex-col items-center gap-8 py-8">
-      {/* Progress */}
-      <div className="text-center">
+      {/* Progress and difficulty indicator */}
+      <div className="text-center space-y-2">
         <p className="text-[var(--muted-foreground)]">
           Score: {correctCount} / {totalTrials}
+          {adaptiveDifficulty && totalTrials >= 5 && (
+            <span className="ml-2">
+              ({Math.round(successRate * 100)}% {trendIcon})
+            </span>
+          )}
         </p>
+
+        {/* Difficulty level indicator */}
+        {adaptiveDifficulty && (
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-sm text-[var(--muted-foreground)]">Level:</span>
+            <div className="flex gap-1">
+              {[2, 3, 4, 5].map((level) => (
+                <div
+                  key={level}
+                  className={cn(
+                    "w-3 h-3 rounded-full transition-all",
+                    level <= arraySize
+                      ? "bg-[var(--primary)]"
+                      : "bg-gray-200"
+                  )}
+                />
+              ))}
+            </div>
+            <span className="text-sm font-medium">{arraySize} cards</span>
+          </div>
+        )}
+
+        {/* Difficulty change message */}
+        <AnimatePresence>
+          {difficultyMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--primary)]/10 text-[var(--primary)] rounded-full text-sm font-medium"
+            >
+              <span>{arraySize > (initialArraySize || 2) ? '⬆️' : '⬇️'}</span>
+              {difficultyMessage}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Target prompt */}

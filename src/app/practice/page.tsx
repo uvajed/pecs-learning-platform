@@ -2,12 +2,19 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Play, Lock, CheckCircle, UserPlus } from "lucide-react";
+import { ArrowLeft, Play, Lock, CheckCircle, UserPlus, Sparkles } from "lucide-react";
 import { DashboardShell, PageHeader } from "@/components/layout/DashboardShell";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { PECS_PHASES, type PECSPhase } from "@/types";
 import { cn } from "@/lib/utils";
+import { RecommendationCard, SessionPlanCard } from "@/components/recommendations";
+import {
+  generateRecommendations,
+  generateSessionPlan,
+  type ChildPerformance,
+  type SessionRecommendation,
+} from "@/lib/ai/recommendations";
 
 
 // All phases unlocked so users can practice any phase
@@ -18,6 +25,32 @@ const mockProgress: Record<number, "locked" | "in_progress" | "completed"> = {
   4: "in_progress",
   5: "in_progress",
   6: "in_progress",
+};
+
+// Mock performance data for AI recommendations
+const mockPerformance: ChildPerformance = {
+  currentPhase: 3,
+  recentSuccessRate: 78,
+  avgResponseTime: 3.2,
+  streakDays: 5,
+  totalSessions: 25,
+  lastSessionDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // Yesterday
+  phaseProgress: [
+    { phase: 1, successRate: 95, sessionsCompleted: 12 },
+    { phase: 2, successRate: 88, sessionsCompleted: 10 },
+    { phase: 3, successRate: 78, sessionsCompleted: 8 },
+    { phase: 4, successRate: 0, sessionsCompleted: 0 },
+    { phase: 5, successRate: 0, sessionsCompleted: 0 },
+    { phase: 6, successRate: 0, sessionsCompleted: 0 },
+  ],
+  recentCards: [
+    { cardId: "cookie", successRate: 95, timesUsed: 20 },
+    { cardId: "juice", successRate: 90, timesUsed: 18 },
+    { cardId: "ball", successRate: 65, timesUsed: 12 },
+    { cardId: "puzzle", successRate: 55, timesUsed: 8 },
+  ],
+  preferredCategories: ["food", "toys"],
+  challengingCards: ["puzzle", "ball", "blocks"],
 };
 
 interface Child {
@@ -31,6 +64,31 @@ export default function PracticePage() {
   const [selectedChild, setSelectedChild] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [guestMode, setGuestMode] = React.useState(false);
+  const [showAIPanel, setShowAIPanel] = React.useState(true);
+  const [dismissedRecs, setDismissedRecs] = React.useState<Set<string>>(new Set());
+
+  // Generate recommendations and session plan
+  const recommendations = React.useMemo(() => {
+    return generateRecommendations(mockPerformance).filter(
+      (r) => !dismissedRecs.has(r.id)
+    );
+  }, [dismissedRecs]);
+
+  const sessionPlan = React.useMemo(() => {
+    return generateSessionPlan(mockPerformance);
+  }, []);
+
+  const handleDismissRecommendation = (id: string) => {
+    setDismissedRecs((prev) => new Set([...prev, id]));
+  };
+
+  const handleRecommendationAction = (rec: SessionRecommendation) => {
+    if (rec.data?.nextPhase) {
+      window.location.href = `/practice/phase/${rec.data.nextPhase}`;
+    } else if (rec.type === "phase") {
+      window.location.href = `/practice/phase/${mockPerformance.currentPhase}`;
+    }
+  };
 
   React.useEffect(() => {
     async function fetchChildren() {
@@ -103,14 +161,62 @@ export default function PracticePage() {
         title="Practice Session"
         description={isGuestSession ? "Guest Mode - Choose a phase to practice" : selectedChild ? `Choose a phase to practice with ${selectedChild}` : "Choose a phase to practice"}
         action={
-          <Link href="/">
-            <Button variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+          <div className="flex gap-2">
+            <Button
+              variant={showAIPanel ? "default" : "outline"}
+              onClick={() => setShowAIPanel(!showAIPanel)}
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              AI Suggestions
             </Button>
-          </Link>
+            <Link href="/">
+              <Button variant="outline">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+            </Link>
+          </div>
         }
       />
+
+      {/* AI Recommendations Panel */}
+      {showAIPanel && !isGuestSession && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Session Plan */}
+          <div className="lg:col-span-2">
+            <SessionPlanCard
+              plan={sessionPlan}
+              onStart={() => window.location.href = `/practice/phase/${sessionPlan.recommendedPhase}`}
+            />
+          </div>
+
+          {/* Recommendations */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[var(--primary)]" />
+                Recommendations
+              </h3>
+              <span className="text-xs text-[var(--muted-foreground)]">
+                {recommendations.length} active
+              </span>
+            </div>
+            {recommendations.slice(0, 3).map((rec) => (
+              <RecommendationCard
+                key={rec.id}
+                recommendation={rec}
+                onAction={handleRecommendationAction}
+                onDismiss={handleDismissRecommendation}
+              />
+            ))}
+            {recommendations.length === 0 && (
+              <div className="text-center py-6 text-[var(--muted-foreground)]">
+                <p>All caught up! No recommendations right now.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Child selector - hidden in guest mode */}
       {children.length > 0 && !guestMode && (

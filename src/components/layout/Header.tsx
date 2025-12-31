@@ -3,12 +3,13 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Menu, X, Settings, LogOut, Volume2, VolumeX } from "lucide-react";
+import { Menu, X, Settings, LogOut, Volume2, VolumeX, Trophy, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { ChildSwitcher, AddChildDialog } from "@/components/children";
 
 interface HeaderProps {
   showNav?: boolean;
@@ -19,8 +20,9 @@ export function Header({ showNav = true, className }: HeaderProps) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
+  const [isAddChildOpen, setIsAddChildOpen] = React.useState(false);
   const { soundEnabled, toggleSound } = useUIStore();
-  const { user, signOut, loading } = useAuth();
+  const { user, profile, signOut, loading, isGuest } = useAuth();
 
   const handleSignOut = async () => {
     await signOut();
@@ -28,14 +30,21 @@ export function Header({ showNav = true, className }: HeaderProps) {
     router.push("/login");
   };
 
-  // Get user display name from metadata or email
-  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+  // Get user display name from profile, metadata, or email
+  const displayName = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Guest";
   const initials = displayName
     .split(" ")
     .map((n: string) => n[0])
     .join("")
     .toUpperCase()
-    .slice(0, 2);
+    .slice(0, 2) || "G";
+
+  // Get role badge color
+  const roleBadgeColor = profile?.role === 'therapist'
+    ? 'bg-blue-100 text-blue-700'
+    : profile?.role === 'admin'
+      ? 'bg-purple-100 text-purple-700'
+      : 'bg-green-100 text-green-700';
 
   return (
     <header
@@ -79,6 +88,15 @@ export function Header({ showNav = true, className }: HeaderProps) {
 
         {/* Right side actions */}
         <div className="flex items-center gap-3">
+          {/* Child switcher */}
+          {user && (
+            <ChildSwitcher
+              compact={false}
+              onAddChild={() => setIsAddChildOpen(true)}
+              className="hidden sm:flex"
+            />
+          )}
+
           {/* Sound toggle */}
           <Button
             variant="ghost"
@@ -106,11 +124,26 @@ export function Header({ showNav = true, className }: HeaderProps) {
               </button>
 
               {isUserMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] shadow-lg py-2">
-                  <div className="px-4 py-2 border-b border-[var(--border)]">
-                    <p className="font-medium">{displayName}</p>
+                <div className="absolute right-0 top-full mt-2 w-64 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] shadow-lg py-2">
+                  <div className="px-4 py-3 border-b border-[var(--border)]">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{displayName}</p>
+                      {profile?.role && (
+                        <span className={cn("text-xs px-2 py-0.5 rounded-full capitalize", roleBadgeColor)}>
+                          {profile.role}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-[var(--muted-foreground)]">{user.email}</p>
                   </div>
+                  <Link
+                    href="/achievements"
+                    className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--muted)] transition-colors"
+                    onClick={() => setIsUserMenuOpen(false)}
+                  >
+                    <Trophy className="w-4 h-4" />
+                    Achievements
+                  </Link>
                   <Link
                     href="/settings"
                     className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--muted)] transition-colors"
@@ -119,20 +152,25 @@ export function Header({ showNav = true, className }: HeaderProps) {
                     <Settings className="w-4 h-4" />
                     Settings
                   </Link>
-                  <button
-                    className="w-full flex items-center gap-2 px-4 py-2 hover:bg-[var(--muted)] transition-colors text-left"
-                    onClick={handleSignOut}
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Sign out
-                  </button>
+                  <div className="border-t border-[var(--border)] mt-1 pt-1">
+                    <button
+                      className="w-full flex items-center gap-2 px-4 py-2 hover:bg-[var(--muted)] transition-colors text-left text-red-600"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign out
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
-          ) : !loading ? (
-            <Link href="/login">
-              <Button variant="default">Sign in</Button>
-            </Link>
+          ) : !loading && isGuest ? (
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline text-sm text-[var(--muted-foreground)]">Guest Mode</span>
+              <Link href="/login">
+                <Button variant="default" size="sm">Sign in</Button>
+              </Link>
+            </div>
           ) : null}
 
           {/* Mobile menu button */}
@@ -152,6 +190,17 @@ export function Header({ showNav = true, className }: HeaderProps) {
       {showNav && isMenuOpen && (
         <nav className="md:hidden border-t border-[var(--border)] bg-[var(--card)] py-4">
           <div className="container mx-auto px-4 flex flex-col gap-4">
+            {/* Mobile child switcher */}
+            {user && (
+              <div className="pb-2 border-b border-[var(--border)]">
+                <ChildSwitcher
+                  onAddChild={() => {
+                    setIsAddChildOpen(true);
+                    setIsMenuOpen(false);
+                  }}
+                />
+              </div>
+            )}
             <Link
               href="/children"
               className="text-[var(--foreground)] hover:text-[var(--primary)] transition-colors py-2"
@@ -187,6 +236,12 @@ export function Header({ showNav = true, className }: HeaderProps) {
           </div>
         </nav>
       )}
+
+      {/* Add Child Dialog */}
+      <AddChildDialog
+        isOpen={isAddChildOpen}
+        onClose={() => setIsAddChildOpen(false)}
+      />
     </header>
   );
 }

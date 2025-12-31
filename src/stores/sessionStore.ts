@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Child, PECSPhase, SessionActivity, PromptLevel } from "@/types";
+import type { Child, PECSPhase, SessionActivity } from "@/types";
 
 interface SessionState {
   // Current session data
@@ -9,21 +9,35 @@ interface SessionState {
   sessionStartTime: Date | null;
   activities: SessionActivity[];
 
+  // Database session ID (if persisted)
+  dbSessionId: string | null;
+
   // Session actions
-  startSession: (child: Child, phase: PECSPhase) => void;
+  startSession: (child: Child, phase: PECSPhase, dbSessionId?: string | null) => void;
   endSession: () => SessionSummary | null;
   recordActivity: (activity: Omit<SessionActivity, "id" | "sessionId" | "recordedAt">) => void;
+
+  // Getters
+  getSessionData: () => {
+    childId: string | null;
+    phase: PECSPhase | null;
+    dbSessionId: string | null;
+    activities: SessionActivity[];
+    durationSeconds: number;
+  };
 
   // UI state
   isPaused: boolean;
   togglePause: () => void;
 }
 
-interface SessionSummary {
+export interface SessionSummary {
   duration: number;
   totalActivities: number;
   successRate: number;
   independentRate: number;
+  successfulCount: number;
+  activities: SessionActivity[];
 }
 
 export const useSessionStore = create<SessionState>((set, get) => ({
@@ -33,16 +47,18 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   currentPhase: null,
   sessionStartTime: null,
   activities: [],
+  dbSessionId: null,
   isPaused: false,
 
   // Actions
-  startSession: (child, phase) => {
+  startSession: (child, phase, dbSessionId = null) => {
     set({
       isSessionActive: true,
       currentChild: child,
       currentPhase: phase,
       sessionStartTime: new Date(),
       activities: [],
+      dbSessionId,
       isPaused: false,
     });
   },
@@ -71,6 +87,8 @@ export const useSessionStore = create<SessionState>((set, get) => ({
         state.activities.length > 0
           ? Math.round((independentActivities.length / state.activities.length) * 100)
           : 0,
+      successfulCount: successfulActivities.length,
+      activities: [...state.activities],
     };
 
     set({
@@ -79,6 +97,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
       currentPhase: null,
       sessionStartTime: null,
       activities: [],
+      dbSessionId: null,
       isPaused: false,
     });
 
@@ -86,16 +105,32 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   },
 
   recordActivity: (activity) => {
+    const state = get();
     const newActivity: SessionActivity = {
       ...activity,
       id: crypto.randomUUID(),
-      sessionId: "", // Will be set when saving to database
+      sessionId: state.dbSessionId || "",
       recordedAt: new Date().toISOString(),
     };
 
-    set((state) => ({
-      activities: [...state.activities, newActivity],
+    set((prevState) => ({
+      activities: [...prevState.activities, newActivity],
     }));
+  },
+
+  getSessionData: () => {
+    const state = get();
+    const durationSeconds = state.sessionStartTime
+      ? Math.floor((new Date().getTime() - state.sessionStartTime.getTime()) / 1000)
+      : 0;
+
+    return {
+      childId: state.currentChild?.id || null,
+      phase: state.currentPhase,
+      dbSessionId: state.dbSessionId,
+      activities: state.activities,
+      durationSeconds,
+    };
   },
 
   togglePause: () => {

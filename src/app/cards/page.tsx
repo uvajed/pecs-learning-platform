@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Volume2, Trash2, Upload } from "lucide-react";
+import { Plus, Search, Volume2, Trash2, Upload, Camera, Smile } from "lucide-react";
 import { DashboardShell, PageHeader } from "@/components/layout/DashboardShell";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -25,7 +25,9 @@ import {
   PLACE_CARDS,
   STARTER_CARDS,
 } from "@/lib/cards/cardData";
+import { ImageUpload } from "@/components/cards/upload";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 const categories = ["All", "Food", "Toys", "Actions", "People", "Feelings", "Places", "Starters", "Custom"];
 
@@ -69,6 +71,8 @@ export default function CardsPage() {
   const [newCardLabel, setNewCardLabel] = useState("");
   const [newCardCategory, setNewCardCategory] = useState("Custom");
   const [selectedEmoji, setSelectedEmoji] = useState("");
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [createMode, setCreateMode] = useState<"emoji" | "photo">("emoji");
   const [isSaving, setIsSaving] = useState(false);
 
   // Load custom cards from localStorage on mount
@@ -101,16 +105,19 @@ export default function CardsPage() {
   });
 
   const handleCreateCard = () => {
-    if (!newCardLabel.trim() || !selectedEmoji) return;
+    const hasEmoji = createMode === "emoji" && selectedEmoji;
+    const hasPhoto = createMode === "photo" && uploadedImage;
+
+    if (!newCardLabel.trim() || (!hasEmoji && !hasPhoto)) return;
 
     setIsSaving(true);
 
     const newCard: CustomCard = {
       id: `custom-${Date.now()}`,
       label: newCardLabel.trim(),
-      imageUrl: "",
+      imageUrl: uploadedImage || "",
       category: newCardCategory,
-      emoji: selectedEmoji,
+      emoji: createMode === "emoji" ? selectedEmoji : undefined,
       isCustom: true,
     };
 
@@ -119,7 +126,9 @@ export default function CardsPage() {
     // Reset form
     setNewCardLabel("");
     setSelectedEmoji("");
+    setUploadedImage(null);
     setNewCardCategory("Custom");
+    setCreateMode("emoji");
     setIsCreateDialogOpen(false);
     setIsSaving(false);
   };
@@ -207,13 +216,26 @@ export default function CardsPage() {
               <div className="w-20 h-20 relative mb-3 flex items-center justify-center">
                 {"emoji" in card && card.emoji ? (
                   <span className="text-5xl">{card.emoji}</span>
-                ) : (
+                ) : card.imageUrl?.startsWith("data:") ? (
+                  // Custom uploaded image (base64)
+                  <img
+                    src={card.imageUrl}
+                    alt={card.label}
+                    className="w-full h-full object-contain"
+                  />
+                ) : card.imageUrl ? (
+                  // Built-in card image
                   <Image
                     src={card.imageUrl}
                     alt={card.label}
                     fill
                     className="object-contain"
                   />
+                ) : (
+                  // Fallback placeholder
+                  <div className="w-full h-full bg-[var(--muted)] rounded flex items-center justify-center text-2xl">
+                    ?
+                  </div>
                 )}
               </div>
               <span className="font-medium text-center">{card.label}</span>
@@ -247,15 +269,45 @@ export default function CardsPage() {
 
       {/* Create Card Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create Custom Card</DialogTitle>
             <DialogDescription>
-              Create a new picture card with an emoji and label.
+              Create a new picture card with an emoji or photo.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
+            {/* Mode Toggle */}
+            <div className="flex rounded-[var(--radius)] border border-[var(--border)] p-1">
+              <button
+                type="button"
+                onClick={() => setCreateMode("emoji")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-2 rounded-[var(--radius)] text-sm font-medium transition-all",
+                  createMode === "emoji"
+                    ? "bg-[var(--primary)] text-white"
+                    : "hover:bg-[var(--muted)]"
+                )}
+              >
+                <Smile className="w-4 h-4" />
+                Emoji
+              </button>
+              <button
+                type="button"
+                onClick={() => setCreateMode("photo")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-2 rounded-[var(--radius)] text-sm font-medium transition-all",
+                  createMode === "photo"
+                    ? "bg-[var(--primary)] text-white"
+                    : "hover:bg-[var(--muted)]"
+                )}
+              >
+                <Camera className="w-4 h-4" />
+                Photo
+              </button>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="cardLabel">Card Label</Label>
               <Input
@@ -267,29 +319,43 @@ export default function CardsPage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Choose an Emoji</Label>
-              <div className="grid grid-cols-8 gap-2 p-3 bg-[var(--muted)]/50 rounded-[var(--radius)] max-h-40 overflow-y-auto">
-                {emojiOptions.map((emoji) => (
-                  <button
-                    key={emoji}
-                    onClick={() => setSelectedEmoji(emoji)}
-                    className={`text-2xl p-2 rounded-[var(--radius)] transition-all ${
-                      selectedEmoji === emoji
-                        ? "bg-[var(--primary)] scale-110"
-                        : "hover:bg-[var(--muted)]"
-                    }`}
-                  >
-                    {emoji}
-                  </button>
-                ))}
+            {createMode === "emoji" ? (
+              <div className="space-y-2">
+                <Label>Choose an Emoji</Label>
+                <div className="grid grid-cols-8 gap-2 p-3 bg-[var(--muted)]/50 rounded-[var(--radius)] max-h-40 overflow-y-auto">
+                  {emojiOptions.map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => setSelectedEmoji(emoji)}
+                      className={`text-2xl p-2 rounded-[var(--radius)] transition-all ${
+                        selectedEmoji === emoji
+                          ? "bg-[var(--primary)] scale-110"
+                          : "hover:bg-[var(--muted)]"
+                      }`}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+                {selectedEmoji && (
+                  <p className="text-sm text-[var(--muted-foreground)]">
+                    Selected: <span className="text-xl">{selectedEmoji}</span>
+                  </p>
+                )}
               </div>
-              {selectedEmoji && (
-                <p className="text-sm text-[var(--muted-foreground)]">
-                  Selected: <span className="text-xl">{selectedEmoji}</span>
+            ) : (
+              <div className="space-y-2">
+                <Label>Upload Photo</Label>
+                <ImageUpload
+                  value={uploadedImage || undefined}
+                  onChange={(url) => setUploadedImage(url)}
+                />
+                <p className="text-xs text-[var(--muted-foreground)]">
+                  Take a photo or upload an image of the item. Works great for personal items, family photos, or specific toys.
                 </p>
-              )}
-            </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="cardCategory">Category</Label>
@@ -308,6 +374,23 @@ export default function CardsPage() {
                 <option value="Places">Places</option>
               </select>
             </div>
+
+            {/* Preview */}
+            {newCardLabel && (createMode === "emoji" ? selectedEmoji : uploadedImage) && (
+              <div className="p-4 bg-[var(--muted)]/30 rounded-[var(--radius-lg)] text-center">
+                <p className="text-xs text-[var(--muted-foreground)] mb-2">Preview</p>
+                <div className="inline-flex flex-col items-center gap-2 p-3 bg-white rounded-[var(--radius)] border-2 border-[var(--primary)] shadow-lg">
+                  {createMode === "emoji" ? (
+                    <span className="text-4xl">{selectedEmoji}</span>
+                  ) : uploadedImage ? (
+                    <div className="w-16 h-16 rounded overflow-hidden">
+                      <img src={uploadedImage} alt={newCardLabel} className="w-full h-full object-contain" />
+                    </div>
+                  ) : null}
+                  <span className="font-semibold">{newCardLabel}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
@@ -316,7 +399,7 @@ export default function CardsPage() {
             </Button>
             <Button
               onClick={handleCreateCard}
-              disabled={!newCardLabel.trim() || !selectedEmoji || isSaving}
+              disabled={!newCardLabel.trim() || (createMode === "emoji" ? !selectedEmoji : !uploadedImage) || isSaving}
             >
               {isSaving ? "Creating..." : "Create Card"}
             </Button>
